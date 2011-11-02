@@ -20,20 +20,22 @@ class MyBot:
     # the ants class has the game state and is updated by the Ants.run method
     # it also has several helper methods to use
     def do_turn(self, ants):
-        # loop through all my ants and try to give them orders
-        # the ant_loc is an ant location tuple in (row, col) form
+        # track all moves, prevent collisions
+        orders = {}
+        def do_move_direction(loc, direction):
+            new_loc = ants.destination(loc, direction)
+            if (ants.unoccupied(new_loc) and new_loc not in orders):
+                ants.issue_order((loc, direction))
+                orders[new_loc] = loc
+                return True
+            else:
+                return False
+
+        # default move
         for ant_loc in ants.my_ants():
-            # try all directions in given order
             directions = ('n','e','s','w')
             for direction in directions:
-                # the destination method will wrap around the map properly
-                # and give us a new (row, col) tuple
-                new_loc = ants.destination(ant_loc, direction)
-                # passable returns true if the location is land
-                if (ants.passable(new_loc)):
-                    # an order is the location of a current ant and a direction
-                    ants.issue_order((ant_loc, direction))
-                    # stop now, don't give 1 ant multiple orders
+                if do_move_direction(ant_loc, direction):
                     break
             # check if we still have time left to calculate more orders
             if ants.time_remaining() < 10:
