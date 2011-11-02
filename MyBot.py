@@ -40,6 +40,10 @@ class MyBot:
                     return True
             return False
 
+        # prevent stepping on own hill
+        for hill_loc in ants.my_hills():
+            orders[hill_loc] = None
+
         # find close food
         ant_dist = []
         for food_loc in ants.food():
@@ -51,7 +55,13 @@ class MyBot:
             if food_loc not in targets and ant_loc not in targets.values():
                 do_move_location(ant_loc, food_loc)
 
-            
+        # unblock own hill
+        for hill_loc in ants.my_hills():
+            if hill_loc in ants.my_ants() and hill_loc not in orders.values():
+                for direction in ('s','e','w','n'):
+                    if do_move_direction(hill_loc, direction):
+                        break
+
 if __name__ == '__main__':
     # psyco will speed up python a little, but is not needed
     try:
