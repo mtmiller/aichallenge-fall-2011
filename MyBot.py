@@ -31,15 +31,26 @@ class MyBot:
             else:
                 return False
 
-        # default move
-        for ant_loc in ants.my_ants():
-            directions = ('n','e','s','w')
+        targets = {}
+        def do_move_location(loc, dest):
+            directions = ants.direction(loc, dest)
             for direction in directions:
-                if do_move_direction(ant_loc, direction):
-                    break
-            # check if we still have time left to calculate more orders
-            if ants.time_remaining() < 10:
-                break
+                if do_move_direction(loc, direction):
+                    targets[dest] = loc
+                    return True
+            return False
+
+        # find close food
+        ant_dist = []
+        for food_loc in ants.food():
+            for ant_loc in ants.my_ants():
+                dist = ants.distance(ant_loc, food_loc)
+                ant_dist.append((dist, ant_loc, food_loc))
+        ant_dist.sort()
+        for dist, ant_loc, food_loc in ant_dist:
+            if food_loc not in targets and ant_loc not in targets.values():
+                do_move_location(ant_loc, food_loc)
+
             
 if __name__ == '__main__':
     # psyco will speed up python a little, but is not needed
